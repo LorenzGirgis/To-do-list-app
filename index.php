@@ -13,6 +13,19 @@ try {
     echo $e->getMessage();
 }
 ?>
+<?php
+if (isset($_POST['submit'])) {
+$naam = $_POST['naam'];
+$pdoQuery =
+    ' INSERT INTO `todo`(`naam`) VALUES (:naam)';
+$pdoQuery_run = $conn->prepare($pdoQuery);
+$pdoQuery_execc = $pdoQuery_run->execute([
+    ':naam' => $naam
+]);
+}
+$mirvat = $conn->prepare('SELECT * FROM todo');
+$mirvat->execute();
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -76,13 +89,61 @@ try {
     <fom>
   <div class="mb-4">
             <h1 class="text-grey-darkest">To-do List</h1>
-            <p class="text-sm text-grey-dark">Add a new task to your list</p>
+<div class="mx-auto w-11/12">
+            <form action="" method="post">
             <div class="flex mt-4">
+            <label for="naam" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"></label>
                 <input class="shadow appearance-none border rounded w-full py-2 px-3 mr-4 text-grey-darker" placeholder="Add Todo">
-                <button class="flex-no-shrink p-2 border-2 rounded text-teal border-teal hover:bg-blue-100 ">Add</button>
+                <button type="submit" name="submit" class="flex-no-shrink p-2 border-2 rounded text-teal border-teal hover:bg-blue-100 ">Add</button>
             </div>
-                      </form>
-            <br>
-    
-</body>
+        </div>
+        </form>
+
+    <div class="flex">
+<div class="py-2 inline-block min-w-full sm:px-6 lg:px-8">
+    <div class="overflow-hidden">
+    <table class="min-w-full">
+        <thead class="border-b">
+        <tr>
+        <th scope="col" class="text-sm font-medium text-gray-900 px-6 py-4 text-left">
+            #
+            </th>
+            <th scope="col" class="text-sm font-medium text-gray-900 px-6 py-4 text-left">
+           To-do
+            </th>
+            <th scope="col" class="text-sm font-medium text-gray-900 px-6 py-4 text-left">
+            Tijd
+            </th>
+            <th scope="col" class="text-sm font-medium text-gray-900 px-6 py-4 text-left">
+            Status
+            </th>
+        </tr>
+        </thead>
+        <tbody>
+        <?php while ($row = $mirvat->fetch(PDO::FETCH_ASSOC)) { ?>
+        <tr class="bg-white border-b">
+            <td class="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">
+            <?= $row['id'] ?>
+            </td>
+            <td class="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">
+            <?= $row['naam'] ?>
+            </td>
+            <td class="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">
+            <a href="edit.php?id=<?= $row['id'] ?>">
+            <button class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">Edit</button>
+</a>
+        <a href="delete.php?id=<?= $row['id'] ?>"
+           onclick="return confirm('Are you sure you want to delete this entry?')" class='bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded'>Delete
+        </a>
+            </td>
+        </tr>
+        <?php } ?>
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+    <script src="https://unpkg.com/flowbite@1.5.3/dist/flowbite.js"></script>
+   </body>
+
 </html>
