@@ -1,30 +1,27 @@
 <?php
 session_start();
-?>
-<?php
-$dsn = "mysql:dbname=todolist;host=localhost";
-$servername = "localhost";
-$username = "bit_academy";
-$password = "bit_academy";
-try {
-    $conn = new PDO("mysql:host=$servername;dbname=todolist", $username, $password);
-    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e) {
-    echo $e->getMessage();
-}
-?>
-<?php
+include 'connect.php';
 if (isset($_POST['submit'])) {
-$naam = $_POST['naam'];
-$pdoQuery =
-    ' INSERT INTO `todo`(`naam`) VALUES (:naam)';
-$pdoQuery_run = $conn->prepare($pdoQuery);
-$pdoQuery_execc = $pdoQuery_run->execute([
-    ':naam' => $naam
-]);
+    if (isset($_POST['naam'])) {
+        $naam = $_POST['naam'];
+        $pdoQuery = 'INSERT INTO `todo`(`naam`) VALUES (:naam)';
+        $pdoQuery_run = $conn->prepare($pdoQuery);
+        $pdoQuery_exec = $pdoQuery_run->execute(array(':naam' => $naam));
+    }
+    foreach ($_POST as $key => $value) {
+        if (strpos($key, 'task_') === 0) {
+            $taskId = substr($key, 5);
+            $status = $value == 'on' ? 1 : 0;
+            $pdoQuery = 'UPDATE `todo` SET `status` = :status WHERE `id` = :id';
+            $pdoQuery_run = $conn->prepare($pdoQuery);
+            $pdoQuery_exec = $pdoQuery_run->execute(array(':status' => $status, ':id' => $taskId));
 }
-$mirvat = $conn->prepare('SELECT * FROM todo');
+    }
+}
+$mirvat = $conn->prepare('SELECT * FROM todo ORDER BY id ASC');
 $mirvat->execute();
+
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -45,8 +42,8 @@ $mirvat->execute();
   <div class="flex items-center">
   <div class="form">
                         <?php
-                        if (isset($_SESSION["userid"])) {
-                            if ($_SESSION["username"] === "Admin") {
+                        if (isset($_SESSION["email"])) {
+                            if ($_SESSION["email"] === "admin@gmail.com") {
                                 $present_time = date("H:i:s-m/d/y");
                                 $expiry = 60*24*60*60+time();
                                setcookie("last_visit", $present_time, $expiry);
@@ -56,7 +53,7 @@ $mirvat->execute();
                                        $last_seen->execute([$last_visit, $_SESSION["userid"]]);
                                    }   
                                ?>
-                        <a href="admin.php" class="mr-4">Admin</a>
+                        <a href="admin.php" class="mr-4"><?= $_SESSION["username"] ?></a>
                         <a href="includes/logout.inc.php">Logout</a>
                         <?php   
                             } else {
@@ -69,6 +66,7 @@ $mirvat->execute();
                                        $last_seen->execute([$last_visit, $_SESSION["userid"]]);
                                    }   
                                ?>
+
                                 <a class="mr-4"><?= $_SESSION["username"] ?></a>
                                 <a href="includes/logout.inc.php">Logout</a>
                         <?php
@@ -88,16 +86,18 @@ $mirvat->execute();
   <div class="flex flex-col">
     <fom>
   <div class="mb-4">
-            <h1 class="text-grey-darkest">To-do List</h1>
-<div class="mx-auto w-11/12">
-            <form action="" method="post">
-            <div class="flex mt-4">
-            <label for="naam" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"></label>
-                <input class="shadow appearance-none border rounded w-full py-2 px-3 mr-4 text-grey-darker" placeholder="Add Todo">
-                <button type="submit" name="submit" class="flex-no-shrink p-2 border-2 rounded text-teal border-teal hover:bg-blue-100 ">Add</button>
-            </div>
-        </div>
-        </form>
+            <form class="bg-white p-6 rounded-lg shadow-md" method="POST" action="index.php">
+    <div class="mb-4">
+    <h1 class="text-grey-darkest">To-do List</h1>
+        <label class="block text-gray-700 font-bold mb-2" for="naam">
+            To-do:
+        </label>
+        <input class="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="text" name="naam" id="naam" required>
+    </div>
+    <div class="flex items-center justify-between">
+        <input class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit" name="submit" value="Submit">
+    </div>
+</form>
 
     <div class="flex">
 <div class="py-2 inline-block min-w-full sm:px-6 lg:px-8">
@@ -105,6 +105,9 @@ $mirvat->execute();
     <table class="min-w-full">
         <thead class="border-b">
         <tr>
+        <th scope="col" class="text-sm font-medium text-gray-900 px-6 py-4 text-left">
+            Completed
+            </th>
         <th scope="col" class="text-sm font-medium text-gray-900 px-6 py-4 text-left">
             #
             </th>
@@ -120,13 +123,20 @@ $mirvat->execute();
         </tr>
         </thead>
         <tbody>
-        <?php while ($row = $mirvat->fetch(PDO::FETCH_ASSOC)) { ?>
+        <?php while ($row = $mirvat->fetch(PDO::FETCH_ASSOC) ) {?>
+            
         <tr class="bg-white border-b">
+        <td class="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">
+            <?= $row['id'] ?>
+            </td>
             <td class="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">
             <?= $row['id'] ?>
             </td>
             <td class="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">
             <?= $row['naam'] ?>
+            </td>
+            <td class="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">
+            <?= $row['tijd']?> 
             </td>
             <td class="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">
             <a href="edit.php?id=<?= $row['id'] ?>">

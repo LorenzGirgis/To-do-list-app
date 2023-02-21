@@ -1,26 +1,14 @@
 <?php
 session_start();
-if (isset($_SESSION["username"])) {
-    if ($_SESSION["username"] == "Admin") {
-        $_SESSION["username"];
+include 'connect.php';
+if (isset($_SESSION["email"])) {
+    if ($_SESSION["email"] == "admin@gmail.com") {
+        $_SESSION["email"];
     } else {
         header("Location: index.php");
     }
 } else {
     header("Location: index.php");
-}
-
-?>
-<?php
-$dsn = "mysql:dbname=todolist;host=localhost";
-$servername = "localhost";
-$username = "bit_academy";
-$password = "bit_academy";
-try {
-    $conn = new PDO("mysql:host=$servername;dbname=todolist", $username, $password);
-    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e) {
-    echo $e->getMessage();
 }
 ?>
 <!DOCTYPE html>
@@ -34,14 +22,16 @@ try {
 </head>
 <body>
 <nav class="flex items-center justify-between px-4 py-3 bg-teal-500">
+    <a href="index.php">
   <div class="flex items-center font-semibold text-white">
     To-Do List
   </div>
+</a>
   <div class="flex items-center">
   <div class="form">
                         <?php
-                        if (isset($_SESSION["userid"])) {
-                            if ($_SESSION["username"] === "Admin") {
+                        if (isset($_SESSION["email"])) {
+                            if ($_SESSION["email"] === "admin@gmail.com") {
                                 $present_time = date("H:i:s-m/d/y");
                                 $expiry = 60*24*60*60+time();
                                setcookie("last_visit", $present_time, $expiry);
@@ -51,7 +41,7 @@ try {
                                        $last_seen->execute([$last_visit, $_SESSION["userid"]]);
                                    }   
                                ?>
-                        <a href="admin.php" class="mr-4">Admin</a>
+                        <a href="admin.php" class="mr-4"><?= $_SESSION["username"] ?></a>
                         <a href="includes/logout.inc.php">Logout</a>
                         <?php   
                             } else {
@@ -64,6 +54,7 @@ try {
                                        $last_seen->execute([$last_visit, $_SESSION["userid"]]);
                                    }   
                                ?>
+
                                 <a class="mr-4"><?= $_SESSION["username"] ?></a>
                                 <a href="includes/logout.inc.php">Logout</a>
                         <?php
@@ -79,5 +70,46 @@ try {
                     </div>
   </div>
 </nav>
+<br>
+<h1 class=" flex justify-center"> Users </h1>
+<div class="flex justify-center  place-items-center p-3 ">
+<div class="flex justify-evenly font-bold text-xs bg-white border-b-2 border-gray-200 rounded-lg w-[115%] h-2/5 p-5 lg:w-2/5  p-3  ">
+<table class="table">
+    <form action="" method="post">
+<tr>
+<th><div>Naam</div></th>
+<th><div>Email</div></th>
+<th><div>Last seen</div></th>
+</tr>
+<?php 
+                try {
+                    $sql = "SELECT * FROM users";
+                    $users = $conn->query($sql);
+                    foreach ($users as $users) {
+                        echo "<tr><td>" . $users["username"] . "</td><td>" . $users["email"] . "</td><td>" . $users["last_seen"] . "</td></tr>";
+                    }
+                } catch (PDOException $error) {
+                    echo $error->getMessage();
+                }
+                ?>
+                <style>
+.table{
+width: 100%;
+border-collapse: separate;
+        border-spacing: 0 25px;
+        text-align: center;
+}
+td , tr {
+
+    border-top-width:2px; 
+border-color: #F3F4F6; 
+    text-align: center;
+    padding-top: 15px; 
+
+}
+</style>                
+</table>
+</div>
+</div>
 </body>
 </html>

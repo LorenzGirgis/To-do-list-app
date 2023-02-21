@@ -24,24 +24,18 @@ class DB {
           }
           
      }
-public function getRegistered() {
+     
+     public function submit($naam) {
+          $stmt = $this->connect()->prepare('INSERT INTO `todo`(`naam`) VALUES (:naam)');
+          $stmt->bindParam(':naam', $naam);
+          $stmt->execute();
+          return $stmt;
+     }
+
+     public function getRegistered() {
      $stmt = $this->connect()->prepare('SELECT COUNT(`username`) FROM `users` LIMIT 3 OFFSET 0');
      $stmt->execute();
-     return $stmt;
+     return $stmt;     
 }
 }
-
-function pdo_connect_mysql() {
-     $DATABASE_HOST = 'localhost';
-     $DATABASE_USER = 'root';
-     $DATABASE_PASS = '';
-     $DATABASE_NAME = 'todolist';
-     try {
-          return new PDO('mysql:host=' . $DATABASE_HOST . ';dbname=' . $DATABASE_NAME . ';charset=utf8', $DATABASE_USER, $DATABASE_PASS);
-     } catch (PDOException $exception) {
-          exit('Failed to connect to database!');
-     }
- }
-
- 
 ?>
