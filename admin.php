@@ -71,45 +71,35 @@ if (isset($_SESSION["email"])) {
   </div>
 </nav>
 <br>
-<h1 class=" flex justify-center"> Users </h1>
-<div class="flex justify-center  place-items-center p-3 ">
-<div class="flex justify-evenly font-bold text-xs bg-white border-b-2 border-gray-200 rounded-lg w-[115%] h-2/5 p-5 lg:w-2/5  p-3  ">
-<table class="table">
-    <form action="" method="post">
-<tr>
-<th><div>Naam</div></th>
-<th><div>Email</div></th>
-<th><div>Last seen</div></th>
-</tr>
-<?php 
-                try {
-                    $sql = "SELECT * FROM users";
-                    $users = $conn->query($sql);
-                    foreach ($users as $users) {
-                        echo "<tr><td>" . $users["username"] . "</td><td>" . $users["email"] . "</td><td>" . $users["last_seen"] . "</td></tr>";
-                    }
-                } catch (PDOException $error) {
-                    echo $error->getMessage();
+<h1 class="flex justify-center"> Users </h1>
+<div class="flex justify-center place-items-center p-3">
+    <div class="flex justify-evenly font-bold text-xs bg-white border-b-2 border-gray-200 rounded-lg w-[115%] h-2/5 p-5 lg:w-2/5 p-3">
+        <table class="w-full border-collapse border border-gray-300">
+            <thead class="bg-gray-100">
+                <tr>
+                    <th class="border border-gray-300 px-4 py-2">Naam</th>
+                    <th class="border border-gray-300 px-4 py-2">Email</th>
+                    <th class="border border-gray-300 px-4 py-2">Last seen</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php
+                $users = $conn->prepare("SELECT * FROM users");
+                $users->execute();
+                $users = $users->fetchAll();
+                foreach ($users as $user) {
+                ?>
+                <tr>
+                    <td class="border border-gray-300 px-4 py-2"><?= $user["username"] ?></td>
+                    <td class="border border-gray-300 px-4 py-2"><?= $user["email"] ?></td>
+                    <td class="border border-gray-300 px-4 py-2"><?= $user["last_seen"] ?></td>
+                </tr>
+                <?php
                 }
                 ?>
-                <style>
-.table{
-width: 100%;
-border-collapse: separate;
-        border-spacing: 0 25px;
-        text-align: center;
-}
-td , tr {
-
-    border-top-width:2px; 
-border-color: #F3F4F6; 
-    text-align: center;
-    padding-top: 15px; 
-
-}
-</style>                
-</table>
-</div>
+            </tbody>
+        </table>
+    </div>
 </div>
 </body>
 </html>

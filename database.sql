@@ -8,7 +8,8 @@ create table `todo` (
         `id` int(11) NOT NULL AUTO_INCREMENT,
         `naam` varchar(255) NOT NULL,
         `tijd` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        PRIMARY KEY (`id`)
+        PRIMARY KEY (`id`),
+        `status` varchar(255) NOT NULL
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
   CREATE TABLE `users` (

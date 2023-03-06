@@ -1,10 +1,14 @@
 <?php
 session_start();
 include 'connect.php';
+if (!isset($conn)) {
+    $conn = new PDO("mysql:host=localhost;dbname=todolist", "root", "");
+    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+}
 if (isset($_POST['submit'])) {
     if (isset($_POST['naam'])) {
         $naam = $_POST['naam'];
-        $pdoQuery = 'INSERT INTO `todo`(`naam`) VALUES (:naam)';
+        $pdoQuery = 'INSERT INTO `todo`(`naam`)     VALUES (:naam)';
         $pdoQuery_run = $conn->prepare($pdoQuery);
         $pdoQuery_exec = $pdoQuery_run->execute(array(':naam' => $naam));
     }
@@ -98,7 +102,6 @@ $mirvat->execute();
         <input class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit" name="submit" value="Submit">
     </div>
 </form>
-
     <div class="flex">
 <div class="py-2 inline-block min-w-full sm:px-6 lg:px-8">
     <div class="overflow-hidden">
@@ -127,7 +130,7 @@ $mirvat->execute();
             
         <tr class="bg-white border-b">
         <td class="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">
-            <?= $row['id'] ?>
+        <input type="checkbox" name="task_<?php echo $row['id']; ?>" <?php echo $row['status'] == 1 ? 'checked' : ''; ?>> Completed
             </td>
             <td class="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">
             <?= $row['id'] ?>
@@ -155,5 +158,4 @@ $mirvat->execute();
 </div>
     <script src="https://unpkg.com/flowbite@1.5.3/dist/flowbite.js"></script>
    </body>
-
 </html>
