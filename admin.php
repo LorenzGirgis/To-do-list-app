@@ -77,7 +77,7 @@ if (isset($_SESSION["email"])) {
         <table class="w-full border-collapse border border-gray-300">
             <thead class="bg-gray-100">
                 <tr>
-                    <th class="border border-gray-300 px-4 py-2">Naam</th>
+                    <th class="border border-gray-300 px-4 py-2">Name</th>
                     <th class="border border-gray-300 px-4 py-2">Email</th>
                     <th class="border border-gray-300 px-4 py-2">Last seen</th>
                 </tr>

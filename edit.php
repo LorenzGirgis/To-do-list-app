@@ -82,7 +82,7 @@ if (isset($_POST['submit'])) {
     </div>
     </header>
     <br>
-    <h1 class="flex justify-center">To-do editen</h1>
+    <h1 class="flex justify-center">To-do Edit</h1>
     <br>
     <form class="flex justify-center" action="" method="POST">
         <div class=" mb-6 md:grid-cols-8">

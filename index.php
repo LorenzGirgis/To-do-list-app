@@ -12,20 +12,10 @@ if (isset($_POST['submit'])) {
         $pdoQuery_run = $conn->prepare($pdoQuery);
         $pdoQuery_exec = $pdoQuery_run->execute(array(':naam' => $naam));
     }
-    foreach ($_POST as $key => $value) {
-        if (strpos($key, 'task_') === 0) {
-            $taskId = substr($key, 5);
-            $status = $value == 'on' ? 1 : 0;
-            $pdoQuery = 'UPDATE `todo` SET `status` = :status WHERE `id` = :id';
-            $pdoQuery_run = $conn->prepare($pdoQuery);
-            $pdoQuery_exec = $pdoQuery_run->execute(array(':status' => $status, ':id' => $taskId));
-}
-    }
+   
 }
 $mirvat = $conn->prepare('SELECT * FROM todo ORDER BY id ASC');
 $mirvat->execute();
-
-
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -42,6 +32,11 @@ $mirvat->execute();
   <div class="flex items-center font-semibold text-white">
     To-Do List
   </div>
+  <style>
+    .completed {
+      text-decoration: line-through;
+    }
+  </style>
 </a>
   <div class="flex items-center">
   <div class="form">
@@ -88,11 +83,11 @@ $mirvat->execute();
 </nav>
 <div class="flex flex-col items-center justify-center p-4 bg-white rounded-lg shadow-md">
   <div class="flex flex-col">
-    <fom>
   <div class="mb-4">
             <form class="bg-white p-6 rounded-lg shadow-md" method="POST" action="index.php">
     <div class="mb-4">
     <h1 class="text-grey-darkest">To-do List</h1>
+    <br>
         <label class="block text-gray-700 font-bold mb-2" for="naam">
             To-do:
         </label>
@@ -100,9 +95,12 @@ $mirvat->execute();
     </div>
     <div class="flex items-center justify-between">
         <input class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit" name="submit" value="Submit">
-    </div>
+    </div>                      
 </form>
-    <div class="flex">
+<?php
+include 'pagination.php';
+?>
+<div class="flex">
 <div class="py-2 inline-block min-w-full sm:px-6 lg:px-8">
     <div class="overflow-hidden">
     <table class="min-w-full">
@@ -126,33 +124,53 @@ $mirvat->execute();
         </tr>
         </thead>
         <tbody>
-        <?php while ($row = $mirvat->fetch(PDO::FETCH_ASSOC) ) {?>
-            
-        <tr class="bg-white border-b">
+<?php while ($row = $mirvat->fetch(PDO::FETCH_ASSOC) ) {?>
+    <tr class="bg-white border-b">
         <td class="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">
-        <input type="checkbox" name="task_<?php echo $row['id']; ?>" <?php echo $row['status'] == 1 ? 'checked' : ''; ?>> Completed
-            </td>
-            <td class="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">
+            <form action="check.php" method="POST">
+                <input type="hidden" name="id" value="<?= $row['id'] ?>">
+                <input type="checkbox" name="completed" <?php if($row['status'] == 'completed') echo 'checked'; ?> onchange="this.form.submit();"> Completed
+            </form>
+        </td>
+        <td class="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">
             <?= $row['id'] ?>
-            </td>
-            <td class="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">
-            <?= $row['naam'] ?>
-            </td>
-            <td class="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">
-            <?= $row['tijd']?> 
-            </td>
-            <td class="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">
+        </td>
+        <td class="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">
+            <?php if($row['status'] == 'completed') {?>
+                <del><?= $row['naam'] ?></del>
+            <?php } else {?>
+                <?= $row['naam'] ?>
+            <?php } ?>
+        </td>
+        <td class="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">
+    <?= date('H:i:s', strtotime($row['tijd'])) ?> <?= date('d-m-Y', strtotime($row['tijd'])) ?>
+</td>
+        <td class="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">
             <a href="edit.php?id=<?= $row['id'] ?>">
-            <button class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">Edit</button>
-</a>
-        <a href="delete.php?id=<?= $row['id'] ?>"
-           onclick="return confirm('Are you sure you want to delete this entry?')" class='bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded'>Delete
-        </a>
-            </td>
-        </tr>
+                <button class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">Edit</button>
+            </a>
+            <a href="delete.php?id=<?= $row['id'] ?>" onclick="return confirm('Are you sure you want to delete this entry?')" class='bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded'>Delete</a>
+        </td>
+    </tr>
+<?php } ?>
+</tbody>
+</table>
+<div class="flex justify-center my-4">
+    <div class="flex">
+        <?php if ($page > 1) {?>
+            <a href="?page=<?= $page-1 ?>" class="px-3 py-1 bg-gray-200 rounded-md mr-1 hover:bg-gray-300">Prev</a>
         <?php } ?>
-        </tbody>
-    </table>
+        
+        <?php for ($i=1; $i<=$num_pages; $i++) {?>
+            <a href="?page=<?= $i ?>" class="<?php if($page==$i) echo 'bg-gray-500 text-white'; else echo 'bg-gray-200 text-gray-700'; ?> px-3 py-1 rounded-md mx-1 hover:bg-gray-300"><?= $i ?></a>
+        <?php } ?>
+        
+        <?php if ($page < $num_pages) {?>
+            <a href="?page=<?= $page+1 ?>" class="px-3 py-1 bg-gray-200 rounded-md ml-1 hover:bg-gray-300">Next</a>
+        <?php } ?>
+    </div>
+</div>
+
 </div>
 </div>
 </div>
