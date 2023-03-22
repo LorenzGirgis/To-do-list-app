@@ -1,10 +1,6 @@
 <?php
 session_start();
 include 'connect.php';
-if (!isset($conn)) {
-    $conn = new PDO("mysql:host=localhost;dbname=todolist", "root", "");
-    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-}
 if (isset($_POST['submit'])) {
     if (isset($_POST['naam'])) {
         $naam = $_POST['naam'];
